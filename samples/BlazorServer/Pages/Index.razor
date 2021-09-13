@@ -4,83 +4,35 @@
 
 <hr class="mb-5" />
 
-<EditForm Model="@Person" OnValidSubmit="@SubmitValidForm">
-    <FluentValidationValidator @ref="fluentValidationValidator" DisableAssemblyScanning="@true" />
+<EditForm EditContext="@editContext">
+    <FluentValidationValidator @ref="fluentValidationValidator" DisableAssemblyScanning="true" />
     <ValidationSummary />
-
-    <p>
-        <label>First Name: </label>
-        <InputText @bind-Value="@Person.FirstName" />
-        <ValidationMessage For="@(() => Person.FirstName)" />
-    </p>
-
-    <p>
-        <label>Last Name: </label>
-        <InputText @bind-Value="@Person.LastName" />
-        <ValidationMessage For="@(() => Person.LastName)" />
-    </p>
-
-    <hr />
-
-    <p>
-        <label>Age: </label>
-        <InputNumber @bind-Value="@Person.Age" />
-        <ValidationMessage For="@(() => Person.Age)" />
-    </p>
-
-    <p>
-        <label>Email Address: </label>
-        <InputText @bind-Value="@Person.EmailAddress" />
-        <ValidationMessage For="@(() => Person.EmailAddress)" />
-    </p>
-
-    <p>
-        <label>Address: Line 1: </label>
-        <InputText @bind-Value="@Person.Address.Line1" />
-        <ValidationMessage For="@(() => Person.Address.Line1)" />
-    </p>
-
-    <p>
-        <label>Address: Line 2: </label>
-        <InputText @bind-Value="@Person.Address.Line2" />
-    </p>
-
-    <p>
-        <label>Address: Town: </label>
-        <InputText @bind-Value="@Person.Address.Town" />
-        <ValidationMessage For="@(() => Person.Address.Town)" />
-    </p>
-
-    <p>
-        <label>Address: County: </label>
-        <InputText @bind-Value="@Person.Address.County" />
-        <ValidationMessage For="@(() => Person.Address.County)" />
-    </p>
-
-    <p>
-        <label>Address: Postcode: </label>
-        <InputText @bind-Value="@Person.Address.Postcode" />
-        <ValidationMessage For="@(() => Person.Address.Postcode)" />
-    </p>
-
-    <button type="submit">Save</button>
-
 </EditForm>
 <br />
-<button @onclick="PartialValidate">Partial Validation</button>
+<button @onclick="Validate">Validate</button>
 
 @code {
-    Person Person { get; set; } = new Person();
+    private Animal animal;
 
+    private EditContext editContext;
     private FluentValidationValidator fluentValidationValidator;
 
-    void SubmitValidForm()
+    protected override async Task OnInitializedAsync()
     {
-        Console.WriteLine("Form Submitted Successfully!");
+        this.animal = new Pet
+        {
+            Address = new Address()
+        };
+        this.editContext = new EditContext(this.animal);
+
+        await base.OnInitializedAsync();
     }
 
-    void PartialValidate()
+    private void Validate()
     {
-        Console.WriteLine($"Partial validation result : {fluentValidationValidator.Validate(options => options.IncludeRuleSets("Names"))}");
+        if (this.editContext.Validate())
+        {
+            Console.WriteLine("Form Submitted Successfully!");
+        }
     }
 }

@@ -1,10 +1,10 @@
-using FluentValidation;
+using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using SharedModels;
+using static BlazorServer.Models.Pet;
 
 namespace BlazorServer
 {
@@ -21,10 +21,15 @@ namespace BlazorServer
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddRazorPages();
-            services.AddServerSideBlazor(c => c.DetailedErrors = true);
+            services.AddControllers();
+            services.AddRazorPages()
+                .AddFluentValidation(fv =>
+            {
+                fv.RegisterValidatorsFromAssemblyContaining<Startup>();
+                fv.ImplicitlyValidateChildProperties = true;
+            });
 
-            services.AddTransient<IValidator<Person>, PersonValidator>();
+            services.AddServerSideBlazor(c => c.DetailedErrors = true);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -48,6 +53,7 @@ namespace BlazorServer
 
             app.UseEndpoints(endpoints =>
             {
+                endpoints.MapControllers();
                 endpoints.MapBlazorHub();
                 endpoints.MapFallbackToPage("/_Host");
             });
